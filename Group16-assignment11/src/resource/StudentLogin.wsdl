@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:description
+        targetNamespace="http://jw.nju.edu.cn/wsdl"
+        xmlns:wsdl="http://www.w3.org/ns/wsdl"
+        xmlns:tns="http://jw.nju.edu.cn/wsdl"
+        xmlns:jw="http://jw.nju.edu.cn/schema"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:wsoap="http://www.w3.org/ns/wsdl/soap"
+        xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+        xmlns:wsdlx="http://www.w3.org/ns/wsdl-extensions"
+        xmlns:http="http://schemas.xmlsoap.org/wsdl/http/">
+
+
+
+    <wsdl:documentation>
+        使用学号+密码进行认证服务
+        基于输入进行输出
+    </wsdl:documentation>
+
+    <wsdl:types>
+        <xs:schema xmlns:jw="http://jw.nju.edu.cn/schema"
+                   targetNamespace="http://jw.nju.edu.cn/schema"
+                   elementFormDefault="qualified">
+            <xs:include schemaLocation="./Student.xsd"/>
+            <xs:complexType name="认证信息类型">
+                <xs:sequence minOccurs="1" maxOccurs="1">
+                    <xs:element name="用户名" type="jw:studentIdType" />
+                    <xs:element name="密码" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="loginInfo" type="jw:认证信息类型" />
+            <xs:element name="loginResponse" type="xs:string" />
+            <xs:element name="invalidDataError" type="xs:string"/>
+        </xs:schema>
+    </wsdl:types>
+
+    <wsdl:interface name="loginInterface">
+        <wsdl:fault name="invalidDataFault"
+                    element="jw:invalidDataError" />
+        <wsdl:operation name="login"
+                        pattern="http://www.w3.org/ns/wsdl/in-out"
+                        style="http://www.w3.org/ns/wsdl/style/iri"
+                        wsdlx:safe = "true">
+            <wsdl:input messageLabel="In" element="jw:loginInfo"/>
+            <wsdl:output messageLabel="Out" element="jw:loginResponse"/>
+            <wsdl:outfault ref="tns:invalidDataFault" messageLabel="Out" />
+        </wsdl:operation>
+    </wsdl:interface>
+
+
+    <wsdl:binding name="loginBinding"
+                  interface="tns:loginInterface"
+                  type="http://www.w3.org/ns/wsdl/soap"
+                  wsoap:protocol="http://www.w3.org/2003/05/soap/bindings/HTTP/">
+        <wsdl:operation ref="tns:login"
+                   wsoap:mep="http://www.w3.org/2003/05/soap/mep/soap-response"/>
+        <wsdl:fault ref="tns:invalidDataFault"
+                    wsoap:code="soap:Sender"/>
+    </wsdl:binding>
+
+    <wsdl:service name="loginService" interface="tns:loginInterface">
+            <wsdl:endpoint name="loginEndpoint"
+                           binding="tns:loginBinding"
+                           address="http://jw.nju.edu.cn/login">
+            </wsdl:endpoint>
+        </wsdl:service>
+
+</wsdl:description>
